@@ -18,6 +18,41 @@ object Build extends Build {
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
   )
 
+  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
+    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    publishMavenStyle := true,
+    publishTo <<= version.apply {
+      v =>
+        val nexus = "https://oss.sonatype.org/"
+        if (v.trim.endsWith("SNAPSHOT"))
+          Some("snapshots" at nexus + "content/repositories/snapshots")
+        else
+          Some("releases" at nexus + "service/local/staging/deploy/maven2")
+    },
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0")),
+    publishArtifact in Test := false,
+    pomIncludeRepository := { _ => true },
+    pomExtra :=
+      <url>https://github.com/websudos/phantom</url>
+        <scm>
+          <url>git@github.com:websudos/phantom.git</url>
+          <connection>scm:git:git@github.com:websudos/phantom.git</connection>
+        </scm>
+        <developers>
+          <developer>
+            <id>alexflav</id>
+            <name>Flavian Alexandru</name>
+            <url>http://github.com/alexflav23</url>
+          </developer>
+          <developer>
+            <id>benjumanji</id>
+            <name>Benjamin Edwards</name>
+            <url>http://github.com/benjumanji</url>
+          </developer>
+        </developers>
+  )
+
+
   val sharedSettings: Seq[Def.Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.websudos",
     version := "1.10.1",
@@ -47,7 +82,8 @@ object Build extends Build {
      ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings ++ StandardProject.newSettings
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ mavenPublishSettings ++ StandardProject.newSettings
+
 
   lazy val phantomSbtPlugin = Project(
     id = "phantom-sbt",
@@ -67,5 +103,6 @@ object Build extends Build {
       )
     )
   )
+
 
 }
