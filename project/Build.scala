@@ -5,11 +5,11 @@ import com.twitter.sbt._
 
 object Build extends Build {
   
-  val PhantomVersion = "1.10.0"
+  val PhantomVersion = "1.12.2"
   val CassandraUnitVersion = "2.1.3.2"
 
   val publishSettings: Seq[Def.Setting[_]] = Seq(
-    publishMavenStyle := true,
+    publishMavenStyle := false,
     bintray.BintrayKeys.bintrayOrganization := Some("websudos"),
     bintray.BintrayKeys.bintrayRepository := "oss-releases",
     bintray.BintrayKeys.bintrayReleaseOnPublish in ThisBuild := true,
