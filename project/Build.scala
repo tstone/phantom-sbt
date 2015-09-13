@@ -14,7 +14,7 @@ object Build extends Build {
     bintray.BintrayKeys.bintrayRepository := "oss-releases",
     bintray.BintrayKeys.bintrayReleaseOnPublish in ThisBuild := true,
     publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true},
+    pomIncludeRepository := { _ => true },
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
   )
 
@@ -55,7 +55,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.websudos",
-    version := "1.10.1",
+    version := "1.12.2",
     scalaVersion := "2.10.5",
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
@@ -82,7 +82,7 @@ object Build extends Build {
      ),
     fork in Test := true,
     javaOptions in Test ++= Seq("-Xmx2G")
-  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ mavenPublishSettings ++ StandardProject.newSettings
+  ) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings ++ StandardProject.newSettings
 
 
   lazy val phantomSbtPlugin = Project(
