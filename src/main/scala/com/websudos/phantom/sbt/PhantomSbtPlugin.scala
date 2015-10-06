@@ -58,9 +58,9 @@ object PhantomSbtPlugin extends AutoPlugin {
    */
   object autoImport {
 
-    val phantomStartEmbeddedCassandra = TaskKey[Unit]("Starts embedded Cassandra")
+    val phantomStartEmbeddedCassandra = taskKey[Unit]("Starts embedded Cassandra")
 
-    val phantomCassandraConfig = SettingKey[Option[File]]("YAML file for Cassandra configuration")
+    val phantomCassandraConfig = settingKey[Option[File]]("YAML file for Cassandra configuration")
   }
 
   import autoImport._
