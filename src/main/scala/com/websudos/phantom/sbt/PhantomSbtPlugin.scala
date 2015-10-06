@@ -58,9 +58,10 @@ object PhantomSbtPlugin extends AutoPlugin {
    */
   object autoImport {
 
-    val phantomStartEmbeddedCassandra = TaskKey[Unit]("Starts embedded Cassandra")
+    val phantomStartEmbeddedCassandra = taskKey[Unit]("Starts embedded Cassandra")
+    val phantomCleanupEmbeddedCassandra = taskKey[Unit]("Clean up embedded Cassandra by dropping all of its keyspaces")
 
-    val phantomCassandraConfig = SettingKey[Option[File]]("YAML file for Cassandra configuration")
+    val phantomCassandraConfig = settingKey[Option[File]]("YAML file for Cassandra configuration")
   }
 
   import autoImport._
@@ -69,6 +70,7 @@ object PhantomSbtPlugin extends AutoPlugin {
   override def projectSettings = Seq(
     phantomCassandraConfig := None,
     phantomStartEmbeddedCassandra := EmbeddedCassandra.start(phantomCassandraConfig.value, streams.value.log),
+    phantomCleanupEmbeddedCassandra := EmbeddedCassandra.cleanup(streams.value.log),
     test in Test <<= (test in Test).dependsOn(phantomStartEmbeddedCassandra),
     testQuick in Test <<= (testQuick in Test).dependsOn(phantomStartEmbeddedCassandra),
     testOnly in Test <<= (testOnly in Test).dependsOn(phantomStartEmbeddedCassandra),
@@ -116,6 +118,17 @@ object EmbeddedCassandra {
       }
       else {
         logger.info("Embedded Cassandra has already been started")
+      }
+    }
+  }
+
+  def cleanup (logger: Logger): Unit = {
+    this.synchronized {
+      if (started) {
+        logger.info("Cleaning up embedded Cassandra")
+        EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
+      } else {
+        logger.info("Cassandra is not running, not cleaning up")
       }
     }
   }
