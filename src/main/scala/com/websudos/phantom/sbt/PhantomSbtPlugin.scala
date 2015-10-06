@@ -95,16 +95,17 @@ object EmbeddedCassandra {
     this.synchronized {
       if (!started) {
         blocking {
+          val configFile = config.map(_.toURI.toString) getOrElse EmbeddedCassandraServerHelper.DEFAULT_CASSANDRA_YML_FILE
+          System.setProperty("cassandra.config", configFile)
           try {
             EmbeddedCassandraServerHelper.mkdirs()
           } catch {
-            case NonFatal(e) => {
-              logger.error(e.getMessage)
-            }
+            case NonFatal(e) =>
+              logger.error(s"Error creating Embedded cassandra directories: ${e.getMessage}")
           }
           config match {
             case Some(file) =>
-              logger.info("Starting Cassandra in embedded mode with configuration from $file.")
+              logger.info(s"Starting Cassandra in embedded mode with configuration from $file.")
               EmbeddedCassandraServerHelper.startEmbeddedCassandra(file,
                 EmbeddedCassandraServerHelper.DEFAULT_TMP_DIR, EmbeddedCassandraServerHelper.DEFAULT_STARTUP_TIMEOUT)
             case None =>
