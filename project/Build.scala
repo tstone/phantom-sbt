@@ -6,7 +6,7 @@ import com.twitter.sbt._
 object Build extends Build {
   
   val PhantomVersion = "1.12.2"
-  val CassandraUnitVersion = "2.1.3.2"
+  val CassandraUnitVersion = "2.1.9.2"
 
   val publishSettings: Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := false,
