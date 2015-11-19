@@ -15,6 +15,8 @@
  */
 package com.websudos.phantom.sbt
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import sbt.Keys._
 import sbt._
@@ -29,7 +31,7 @@ import scala.util.control.NonFatal
  * First the plugin must be included in your `plugins.sbt`:
  *
  * {{{
- * addSbtPlugin("com.sphonic" %% "phantom-sbt" % "0.3.0")
+ *   addSbtPlugin("com.websudos" %% "phantom-sbt" % "1.13.0")
  * }}}
  The plugin does the following
  * things:
@@ -46,7 +48,7 @@ import scala.util.control.NonFatal
  * you can do that with a setting:
  *
  * {{{
- * phantomCassandraConfig := baseDirectory.value / "config" / "cassandra.yaml"
+ *   phantomCassandraConfig := baseDirectory.value / "config" / "cassandra.yaml"
  * }}}
  */
 object PhantomSbtPlugin extends AutoPlugin {
@@ -85,7 +87,7 @@ object EmbeddedCassandra {
 
   println("Initialize EmbeddedCassandra singleton.")
 
-  private var started: Boolean = false
+  private[this] val started = new AtomicBoolean(false)
 
   /**
    * Starts Cassandra in embedded mode if it has not been
@@ -93,7 +95,7 @@ object EmbeddedCassandra {
    */
   def start (config: Option[File], logger: Logger): Unit = {
     this.synchronized {
-      if (!started) {
+      if (started.compareAndSet(false, true)) {
         blocking {
           try {
             EmbeddedCassandraServerHelper.mkdirs()
@@ -112,9 +114,7 @@ object EmbeddedCassandra {
               EmbeddedCassandraServerHelper.startEmbeddedCassandra()
           }
         }
-        started = true
-      }
-      else {
+      } else {
         logger.info("Embedded Cassandra has already been started")
       }
     }
