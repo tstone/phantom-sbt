@@ -5,8 +5,8 @@ import com.twitter.sbt._
 
 object Build extends Build {
   
-  val PhantomVersion = "1.12.2"
-  val CassandraUnitVersion = "2.1.9.2"
+  val PhantomVersion = "1.22.0"
+  val CassandraUnitVersion = "2.2.2.1"
 
   val publishSettings: Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := false,
@@ -55,7 +55,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Defaults.coreDefaultSettings ++ Seq(
     organization := "com.websudos",
-    version := "1.13.0",
+    version := PhantomVersion,
     scalaVersion := "2.10.5",
     resolvers ++= Seq(
       "Typesafe repository snapshots" at "http://repo.typesafe.com/typesafe/snapshots/",
