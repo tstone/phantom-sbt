@@ -29,7 +29,7 @@ import scala.util.control.NonFatal
  * First the plugin must be included in your `plugins.sbt`:
  *
  * {{{
- * addSbtPlugin("com.sphonic" %% "phantom-sbt" % "0.3.0")
+ * addSbtPlugin("com.websudos" %% "phantom-sbt" % "0.3.0")
  * }}}
  The plugin does the following
  * things:
@@ -87,7 +87,7 @@ object EmbeddedCassandra {
 
   println("Initialize EmbeddedCassandra singleton.")
 
-  private var started: Boolean = false
+  private[this] var started: Boolean = false
 
   /**
    * Starts Cassandra in embedded mode if it has not been
@@ -123,7 +123,7 @@ object EmbeddedCassandra {
     }
   }
 
-  def cleanup (logger: Logger): Unit = {
+  def cleanup(logger: Logger): Unit = {
     this.synchronized {
       if (started) {
         logger.info("Cleaning up embedded Cassandra")
