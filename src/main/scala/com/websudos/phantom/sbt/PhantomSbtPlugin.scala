@@ -62,6 +62,7 @@ object PhantomSbtPlugin extends AutoPlugin {
     val phantomCleanupEmbeddedCassandra = taskKey[Unit]("Clean up embedded Cassandra by dropping all of its keyspaces")
 
     val phantomCassandraConfig = settingKey[Option[File]]("YAML file for Cassandra configuration")
+    val phantomCassandraTimeout = settingKey[Option[Int]]("Timeout in milliseconds for embedded Cassandra to start")
   }
 
   import autoImport._
@@ -69,7 +70,8 @@ object PhantomSbtPlugin extends AutoPlugin {
 
   override def projectSettings = Seq(
     phantomCassandraConfig := None,
-    phantomStartEmbeddedCassandra := EmbeddedCassandra.start(phantomCassandraConfig.value, streams.value.log),
+    phantomCassandraTimeout := None,
+    phantomStartEmbeddedCassandra := EmbeddedCassandra.start(phantomCassandraConfig.value, phantomCassandraTimeout.value, streams.value.log),
     phantomCleanupEmbeddedCassandra := EmbeddedCassandra.cleanup(streams.value.log),
     test in Test <<= (test in Test).dependsOn(phantomStartEmbeddedCassandra),
     testQuick in Test <<= (testQuick in Test).dependsOn(phantomStartEmbeddedCassandra),
@@ -93,7 +95,7 @@ object EmbeddedCassandra {
    * Starts Cassandra in embedded mode if it has not been
    * started yet.
    */
-  def start (config: Option[File], logger: Logger): Unit = {
+  def start (config: Option[File], timeout: Option[Int], logger: Logger): Unit = {
     this.synchronized {
       if (!started) {
         blocking {
@@ -105,12 +107,20 @@ object EmbeddedCassandra {
             case NonFatal(e) =>
               logger.error(s"Error creating Embedded cassandra directories: ${e.getMessage}")
           }
-          config match {
-            case Some(file) =>
+
+          (config, timeout) match {
+            case (Some(file), None) =>
               logger.info(s"Starting Cassandra in embedded mode with configuration from $file.")
               EmbeddedCassandraServerHelper.startEmbeddedCassandra(file,
                 EmbeddedCassandraServerHelper.DEFAULT_TMP_DIR, EmbeddedCassandraServerHelper.DEFAULT_STARTUP_TIMEOUT)
-            case None =>
+            case (Some(file), Some(timeout)) =>
+              logger.info(s"Starting Cassandra in embedded mode with configuration from $file and timeout set to $timeout ms.")
+              EmbeddedCassandraServerHelper.startEmbeddedCassandra(file,
+                EmbeddedCassandraServerHelper.DEFAULT_TMP_DIR, timeout)
+            case (None, Some(timeout)) =>
+              logger.info(s"Starting Cassandra in embedded mode with default configuration and timeout set to $timeout ms.")
+              EmbeddedCassandraServerHelper.startEmbeddedCassandra(timeout)
+            case (None, None) =>
               logger.info("Starting Cassandra in embedded mode with default configuration.")
               EmbeddedCassandraServerHelper.startEmbeddedCassandra()
           }
